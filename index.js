@@ -15,7 +15,53 @@ const corsOption = {
 app.use(express.json());
 app.use(cors(corsOption));
 
-const list = ["R", "C", "P"];
+const list = [
+  "R",
+  "C",
+  "P",
+  "P",
+  "C",
+  "R",
+  "C",
+  "P",
+  "R",
+  "R",
+  "P",
+  "C",
+  "P",
+  "R",
+  "C",
+  "R",
+  "C",
+  "P",
+  "P",
+  "C",
+  "R",
+  "C",
+  "P",
+  "R",
+  "R",
+  "P",
+  "C",
+  "P",
+  "R",
+  "C",
+  "R",
+  "C",
+  "P",
+  "P",
+  "C",
+  "R",
+  "C",
+  "P",
+  "R",
+  "R",
+  "P",
+  "C",
+  "P",
+  "R",
+  "C",
+];
 
 const whoWon = (stan, com) => {
   if (stan === "R") {
@@ -51,7 +97,8 @@ app.get("/wr", (req, res) => {
           wr: (value.win / value.play) * 100,
         });
       });
-      res.send(data);7
+      res.send(data);
+      7;
     });
     conn.release();
   });
@@ -75,7 +122,7 @@ app.get("/stats", (req, res) => {
 
 app.post("/play", (req, res) => {
   const hand = req.body.hand;
-  const num = Math.floor(Math.random() * 3);
+  const num = Math.floor(Math.random() * list.length);
   pool.getConnection((err, conn) => {
     if (err) throw err;
     const win = whoWon(hand, list[num]);
@@ -83,7 +130,7 @@ app.post("/play", (req, res) => {
     conn.query(q, (err, result, field) => {
       if (err) throw err;
       if (win === "DRAW") res.send("DRAW");
-      else if (win === 'WIN') res.send("you win");
+      else if (win === "WIN") res.send("you win");
       else res.send("you lose");
     });
     conn.release();
@@ -92,4 +139,5 @@ app.post("/play", (req, res) => {
 
 app.listen(port, () => {
   console.log("server running on http://localhost:" + port);
-});7
+});
+7;
