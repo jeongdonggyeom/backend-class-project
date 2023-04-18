@@ -51,8 +51,9 @@ app.get("/wr", (req, res) => {
           wr: (value.win / value.play) * 100,
         });
       });
-      res.send(data);
+      res.send(data);7
     });
+    conn.release();
   });
 });
 
@@ -82,7 +83,7 @@ app.post("/play", (req, res) => {
     conn.query(q, (err, result, field) => {
       if (err) throw err;
       if (win === "DRAW") res.send("DRAW");
-      else if (win === hand) res.send("you win");
+      else if (win === 'WIN') res.send("you win");
       else res.send("you lose");
     });
     conn.release();
@@ -90,5 +91,5 @@ app.post("/play", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log("server running on http://127.0.0.1:" + port);
-});
+  console.log("server running on http://localhost:" + port);
+});7
