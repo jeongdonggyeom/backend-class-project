@@ -126,12 +126,25 @@ app.post("/play", (req, res) => {
   pool.getConnection((err, conn) => {
     if (err) throw err;
     const win = whoWon(hand, list[num]);
-    const q = `insert into project(hand, random, win) values('${hand}', '${list[num]}', '${win}')`;
+    const q = `insert into project(hand, random, win, created) values('${hand}', '${list[num]}', '${win}', current_timestamp)`;
     conn.query(q, (err, result, field) => {
       if (err) throw err;
-      if (win === "DRAW") res.send("DRAW");
-      else if (win === "WIN") res.send("you win");
-      else res.send("you lose");
+      if (win === "DRAW") res.send("무승부입니다.");
+      else if (win === "WIN") res.send("당신이 이겼습니다.");
+      else res.send("당신이 졌습니다.");
+    });
+    conn.release();
+  });
+});
+
+app.get("/day", (req, res) => {
+  const data = req.query.day;
+  pool.getConnection((err, conn) => {
+    if (err) throw err;
+    const q = `select hand, count(case when win = 'WIN' then 1 end) as win from project where created = '${data}' group by hand`;
+    conn.query(q, (err, result, field) => {
+      if (err) throw err;
+      res.send(result);
     });
     conn.release();
   });
