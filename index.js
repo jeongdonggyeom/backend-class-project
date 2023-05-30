@@ -80,10 +80,9 @@ const whoWon = (stan, com) => {
 };
 
 app.get("/wr", (req, res) => {
-  const my = req.body.my;
   pool.getConnection((err, conn) => {
     if (err) throw err;
-    const qs = `select hand, count(*) as play, count(case when win = 'WIN' then 1 end) as win from project group by hand;`;
+    const qs = `select hand, count(*) as play, count(case when win = 'WIN' then 1 end) as win from project group by hand`;
     conn.query(qs, (err, result, field) => {
       if (err) throw err;
       const data = [];
@@ -94,7 +93,7 @@ app.get("/wr", (req, res) => {
         else if (value.hand === "P") hand = "보";
         data.push({
           hand: hand,
-          wr: (value.win / value.play) * 100,
+          wr: ((value.win / value.play) * 100).toFixed(2),
         });
       });
       res.send(data);
@@ -141,10 +140,51 @@ app.get("/day", (req, res) => {
   const data = req.query.day;
   pool.getConnection((err, conn) => {
     if (err) throw err;
-    const q = `select hand, count(case when win = 'WIN' then 1 end) as win from project where created = '${data}' group by hand`;
+    const q = `select count(*) as play, hand, count(case when win = 'WIN' then 1 end) as win from project where created = '${data}' group by hand`;
     conn.query(q, (err, result, field) => {
       if (err) throw err;
-      res.send(result);
+      const arr = [];
+      result.map((value) => {
+        const obj = {
+          hand: value.hand,
+          win: ((value.win / value.play) * 100).toFixed(2),
+        };
+        arr.push(obj);
+      });
+      console.log(arr);
+      res.send(arr);
+    });
+    conn.release();
+  });
+});
+
+app.get("/week", (req, res) => {
+  const { start, end } = req.query;
+  pool.getConnection((err, conn) => {
+    if (err) throw err;
+    const q = `select count(*) as play, hand, count(case when win = 'WIN' then 1 end) as win, created from project where created between '${start}' and '${end}' group by hand, created`;
+    conn.query(q, (err, result, field) => {
+      if (err) throw err;
+      const arr = [];
+      let li = [];
+      let key = result[0].created.toString().substring(0, 10);
+      result.map((value) => {
+        const obj = {
+          hand: value.hand,
+          win: ((value.win / value.play) * 100).toFixed(2),
+          created: value.created,
+        };
+        if (key === value.created.toString().substring(0, 10)) {
+          li.push(obj);
+        } else {
+          arr.push(li);
+          li = [];
+          li.push(obj);
+          key = value.created.toString().substring(0, 10);
+        }
+      });
+      arr.push(li);
+      res.send(arr);
     });
     conn.release();
   });
@@ -153,4 +193,3 @@ app.get("/day", (req, res) => {
 app.listen(port, () => {
   console.log("server running on http://localhost:" + port);
 });
-7;
